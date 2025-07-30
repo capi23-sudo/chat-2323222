@@ -1,60 +1,52 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Webhook</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
-        .chat-container { width: 400px; margin: 50px auto; background: #fff; border: 1px solid #ccc; border-radius: 5px; }
-        .messages { height: 300px; overflow-y: auto; padding: 10px; border-bottom: 1px solid #ccc; }
-        .input-box { display: flex; }
-        .input-box input { flex: 1; padding: 10px; border: none; border-top: 1px solid #ccc; }
-        .input-box button { padding: 10px; border: none; border-left: 1px solid #ccc; background: #4CAF50; color: #fff; cursor: pointer; }
-        .input-box button:hover { background: #45a049; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat con Webhook n8n</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f2f2f2; display: flex; flex-direction: column; align-items: center; margin-top: 50px;}
+    #chat-box { width: 300px; height: 300px; background: #fff; border: 1px solid #ccc; padding: 10px; overflow-y: auto; margin-bottom: 10px; }
+    #message { width: 240px; padding: 5px; }
+    button { padding: 5px 10px; }
+  </style>
 </head>
 <body>
+  <h2>Chat con Webhook n8n</h2>
+  <div id="chat-box"></div>
+  <input type="text" id="message" placeholder="Escribe un mensaje" />
+  <button onclick="sendMessage()">Enviar</button>
 
-<div class="chat-container">
-    <div class="messages" id="messages"></div>
-    <div class="input-box">
-        <input type="text" id="messageInput" placeholder="Escribe un mensaje...">
-        <button onclick="sendMessage()">Enviar</button>
-    </div>
-</div>
-
-<script>
-    const webhookURL = "https://t5ket0exossals0v5lhebjqs.hooks.n8n.cloud/webhook-test/9fe66d37-8637-4cd8-9099-a0c7b9516dd7"; // <-- Pega tu URL de webhook aquí
-
-    function addMessageToChat(message, sender="Tú") {
-        const messagesDiv = document.getElementById("messages");
-        const msg = document.createElement("div");
-        msg.textContent = `${sender}: ${message}`;
-        messagesDiv.appendChild(msg);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
+  <script>
+    const webhookURL = "https://kind-bird-85.hooks.n8n.cloud/webhook-test/9fe66d37-8637-4cd8-9099-a0c7b9516dd7"; // <- Pon tu webhook aquí
 
     async function sendMessage() {
-        const input = document.getElementById("messageInput");
-        const message = input.value.trim();
-        if (!message) return;
+      const input = document.getElementById("message");
+      const msg = input.value.trim();
+      if (!msg) return;
 
-        addMessageToChat(message);
+      // Mostrar el mensaje en el chat
+      const chatBox = document.getElementById("chat-box");
+      const p = document.createElement("p");
+      p.textContent = "Tú: " + msg;
+      chatBox.appendChild(p);
+      chatBox.scrollTop = chatBox.scrollHeight;
 
-        try {
-            await fetch(webhookURL, {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content: message }) // formato usado por Discord/Slack
-            });
-        } catch (error) {
-            console.error("Error al enviar al webhook:", error);
-        }
+      try {
+        const response = await fetch(webhookURL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg })
+        });
+        const result = await response.json();
+        console.log("Respuesta n8n:", result);
+      } catch (error) {
+        console.error("Error al enviar:", error);
+      }
 
-        input.value = "";
+      input.value = "";
     }
-</script>
-
+  </script>
 </body>
 </html>
+
